@@ -1,0 +1,36 @@
+# Python caches and virtual environments
+__pycache__/
+*.py[cod]
+*.pyd
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Local settings and secrets
+.env
+.env.*
+!.env.example
+ffmpeg_path.txt
+
+# Download artifacts
+*.part
+*.partial
+*.ytdl
+*.temp
+
+# FFmpeg archive contents and local binaries
+/bin/
+/doc/
+/presets/
+ffmpeg.exe
+ffprobe.exe
+ffplay.exe
+LICENSE.txt
+
+# Editors and operating systems
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini

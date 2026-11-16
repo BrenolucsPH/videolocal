@@ -1,29 +1,66 @@
 # VideoLocal
 
-Aplicativo local para Windows com interface gráfica simples para salvar vídeos do YouTube em MP4 ou WebM, ou extrair áudio em MP3.
+Aplicativo para Windows que baixa vídeos e áudios do **YouTube**, **X (Twitter)** e **Instagram** direto para o seu computador, com fila de downloads, miniaturas e tema claro/escuro.
 
-## Como abrir
+## Como usar
 
-1. Instale o Python 3.11 ou superior pelo [site oficial](https://www.python.org/downloads/windows/) e habilite **Add Python to PATH** durante a instalação.
-2. Para suporte completo ao YouTube, instale o runtime Deno pelo [site oficial](https://deno.com/) (ou Node.js/Bun). Feche e reabra o aplicativo depois de instalar.
-3. Abra `iniciar.bat`. Na primeira execução, ele cria um ambiente Python isolado nesta pasta e instala `yt-dlp[default]` diretamente do PyPI.
-4. Cole um link HTTPS do YouTube, escolha formato/qualidade e a pasta de destino.
+1. Abra `dist\VideoLocal\VideoLocal.exe` (veja abaixo como gerar). Não é preciso ter Python instalado para usar o executável.
+2. Cole o link do vídeo. O aplicativo reconhece a plataforma automaticamente.
+3. Escolha **Vídeo** (MP4 ou WEBM, até 4K) ou **Áudio** (MP3 ou M4A) e a qualidade.
+4. Clique em **Baixar**. Você pode enfileirar vários links; eles são baixados um por vez.
 
-A primeira configuração precisa de internet. O aplicativo usa os pacotes declarados neste projeto e não baixa instaladores EXE de sites aleatórios. O código está legível e não coleta nem envia dados pessoais para um servidor deste projeto. A transferência se conecta ao YouTube por meio do yt-dlp.
+Ao terminar, cada item oferece atalhos para reproduzir o arquivo, abrir a pasta ou removê-lo da lista. As preferências (pasta, formato, tema) ficam em `%APPDATA%\VideoLocal\settings.json`.
 
-## FFmpeg e formatos
+A pasta `dist\VideoLocal` é independente: pode ser movida ou copiada para outro computador, desde que o `VideoLocal.exe` continue junto das pastas `_internal` e `bin`.
 
-MP4 e WebM podem exigir FFmpeg para juntar vídeo e áudio em algumas qualidades. MP3 sempre requer FFmpeg. Na [página de releases do projeto yt-dlp](https://github.com/yt-dlp/FFmpeg-Builds/releases), baixe `ffmpeg-master-latest-win64-gpl.zip` (para Windows 64 bits), extraia o ZIP e, no aplicativo, clique **Localizar FFmpeg** para escolher `bin/ffmpeg.exe`. O aplicativo também detecta automaticamente `bin/ffmpeg.exe` dentro da pasta do projeto e guarda o caminho de forma relativa. Assim, a configuração acompanha a pasta se você movê-la. Não é necessário alterar o PATH do Windows.
+## Gerar o executável
+
+Requer Python 3.11 ou superior. No PowerShell, dentro da pasta do projeto:
+
+```powershell
+.\build.ps1
+```
+
+O script cria o ambiente `.venv`, instala as dependências, empacota o aplicativo com PyInstaller e copia `bin\ffmpeg.exe` e `bin\ffprobe.exe` para junto do executável. Se o PowerShell bloquear a execução do script, use `powershell -ExecutionPolicy Bypass -File .\build.ps1`.
+
+## Requisitos opcionais
+
+- **FFmpeg** — necessário para áudio (MP3/M4A) e para juntar vídeo e áudio nas melhores qualidades. O aplicativo procura `bin\ffmpeg.exe` ao lado do executável e depois no PATH; também é possível apontar o arquivo em **Configurações**. Baixe `ffmpeg-master-latest-win64-gpl.zip` na [página de releases do projeto yt-dlp](https://github.com/yt-dlp/FFmpeg-Builds/releases) e extraia `ffmpeg.exe` e `ffprobe.exe` para a pasta `bin`.
+- **Runtime JavaScript** — o YouTube exige [Node.js](https://nodejs.org/) ou [Deno](https://deno.com/) instalado para funcionar por completo. X e Instagram não precisam.
+
+## Conteúdo que exige login
+
+Publicações privadas, restritas por idade ou bloqueadas por limite de acessos (comum no Instagram e no X) pedem uma sessão conectada. Em **Configurações → Sessão do navegador**, escolha o navegador em que você já está logado. O aplicativo lê os cookies desse navegador somente no momento do download e não os guarda. O Firefox é o mais confiável; Chrome e Edge costumam bloquear essa leitura no Windows.
+
+Por padrão a opção fica em **Nenhum** e nenhum cookie é lido.
+
+## Desenvolvimento
+
+```powershell
+py -3 -m venv .venv
+.venv\Scripts\python -m pip install -r requirements.txt
+.venv\Scripts\python app.py                         # abre o aplicativo
+.venv\Scripts\python -m unittest discover -s tests  # testes
+```
+
+| Caminho | Função |
+| --- | --- |
+| `app.py` | Ponto de entrada |
+| `videolocal/platforms.py` | Reconhece e valida os links de cada plataforma |
+| `videolocal/downloader.py` | Converte as escolhas em opções do yt-dlp e executa o download |
+| `videolocal/settings.py` | Preferências e caminhos (executável ou código-fonte) |
+| `videolocal/ui.py` | Interface (CustomTkinter) |
+| `tools/make_icon.py` | Gera os ícones em `assets/` |
+| `build.ps1` | Gera o executável |
 
 ## Uso autorizado
 
-Use apenas conteúdo que você enviou, para o qual tenha autorização ou cujo download seja permitido pelo serviço e pela legislação aplicável. Os Termos do YouTube limitam o download aos casos autorizados pelo serviço, pelos titulares ou pela lei: [Termos do YouTube (Brasil)](https://br.youtube.com/t/terms). O aplicativo não usa cookies de conta, não tenta contornar DRM e não faz downloads de playlists.
+Use apenas conteúdo que você enviou, para o qual tenha autorização ou cujo download seja permitido pelo serviço e pela legislação aplicável. Os termos do YouTube, do X e do Instagram limitam o download aos casos autorizados pelo serviço, pelos titulares ou pela lei. O aplicativo não contorna DRM e não baixa playlists inteiras.
 
 ## Limites e segurança
 
-- É uma ferramenta local, sem login, sem anúncios e sem telemetria própria.
-- `yt-dlp` é software de terceiros, instalado do PyPI dentro do ambiente `.venv` deste projeto; atualize-o regularmente. `yt-dlp[default]` inclui dependências Python e os componentes EJS; um runtime JavaScript (como Deno) continua necessário para suporte completo ao YouTube.
-- Nenhum software pode ser declarado “livre de vírus” sem uma verificação independente. Este projeto não inclui binários executáveis de terceiros; para reduzir risco, confira o código, obtenha Python, Deno e FFmpeg de fontes oficiais e mantenha o antivírus ativo.
-- A disponibilidade de formatos e resoluções depende do vídeo. A qualidade escolhida é um limite máximo.
-- Downloads podem não funcionar para conteúdo privado, pago, protegido ou indisponível.
-
+- Ferramenta local, sem conta própria, sem anúncios e sem telemetria. As conexões são feitas somente com a plataforma do link, por meio do yt-dlp.
+- As plataformas mudam com frequência. Se os downloads pararem de funcionar, atualize o yt-dlp (`pip install -U "yt-dlp[default]"`) e gere o executável de novo.
+- O executável não é assinado digitalmente; o Windows SmartScreen pode exibir um aviso na primeira abertura.
+- A qualidade escolhida é um limite máximo: a disponibilidade depende de cada vídeo.
+- Publicações apenas com fotos não são baixadas.

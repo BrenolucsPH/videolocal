@@ -11,5 +11,5 @@
 ## Revisão antes de enviar
 
 - Confira `git status` e a lista de arquivos preparados.
-- Confirme que `.venv`, `bin`, `doc`, `presets` e `ffmpeg_path.txt` não estão no commit.
+- Confirme que `.venv`, `bin`, `doc`, `presets`, `build` e `dist` não estão no commit.
 - Execute verificações adequadas às alterações e descreva limitações no pull request.

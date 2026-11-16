@@ -1,0 +1,2 @@
+# Necessário apenas para gerar o executável (build.ps1)
+pyinstaller>=6.16

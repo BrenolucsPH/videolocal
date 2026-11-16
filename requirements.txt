@@ -1,2 +1,5 @@
-# Interface gráfica e suporte JavaScript para o YouTube
+# Motor de download (inclui o suporte JavaScript para o YouTube)
 yt-dlp[default]>=2026.7.4
+# Interface
+customtkinter>=5.2
+pillow>=10
